@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Tests teh X3DH key exchange for both initiator and responder
+// Tests the X3DH key exchange for both initiator and responder
 func TestX3dhKeyExchange(t *testing.T) {
 	var err error
 
