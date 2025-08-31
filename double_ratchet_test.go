@@ -91,7 +91,7 @@ func TestDoubleRatchet(t *testing.T) {
 		}
 
 		// Verify that skipped message keys are cleared
-		require.Equal(t, len(bobState.skippedMsgKeyMap), 0, "skipped message keys not being cleared")
+		require.Equal(t, len(bobState.SkippedMsgKeyMap), 0, "skipped message keys not being cleared")
 	})
 
 	// Test 4: DH ratchet step
@@ -185,7 +185,7 @@ func TestDoubleRatchet(t *testing.T) {
 		// Verify that skipped message keys are cleared
 		peerKeyBytes := encryptedMsg1.Header.DHPublicKey.Bytes()
 		peerKeyStr := base64.StdEncoding.EncodeToString(peerKeyBytes)
-		require.Equal(t, 0, len(bobState.skippedMsgKeyMap[peerKeyStr]), "skipped message keys not cleared")
+		require.Equal(t, 0, len(bobState.SkippedMsgKeyMap[peerKeyStr]), "skipped message keys not cleared")
 	})
 
 	// Test 6: Error handling for invalid ciphertext

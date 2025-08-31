@@ -25,7 +25,7 @@ type RatchetState struct {
 	DHRatchetKey     *EcdhKeyPair                 // Current DH ratchet key pair
 	PrevSendChainLen uint32                       // Length of the previous sending chain
 	PeerRatchetKey   *ecdh.PublicKey              // Peer's current DH ratchet public key
-	skippedMsgKeyMap map[string]map[uint32][]byte // Map of peer DH public key to message number to message key
+	SkippedMsgKeyMap map[string]map[uint32][]byte // Map of peer DH public key to message number to message key
 }
 
 // Initializes the Double Ratchet state with the X3DH shared secret.
@@ -46,7 +46,7 @@ func InitializeRatchet(sharedSecret []byte) (*RatchetState, error) {
 		RecvMsgNum:       0,
 		PrevSendChainLen: 0,
 		PeerRatchetKey:   nil,
-		skippedMsgKeyMap: make(map[string]map[uint32][]byte),
+		SkippedMsgKeyMap: make(map[string]map[uint32][]byte),
 	}, nil
 }
 
@@ -134,7 +134,7 @@ func (rs *RatchetState) DecryptMessage(msg Message, salt []byte, info []byte) (s
 	peerKeyStr := base64.StdEncoding.EncodeToString(peerKeyBytes)
 
 	// Check if the message key is already stored for this message
-	if msgKeyMap, ok := rs.skippedMsgKeyMap[peerKeyStr]; ok {
+	if msgKeyMap, ok := rs.SkippedMsgKeyMap[peerKeyStr]; ok {
 		if msgKey, ok := msgKeyMap[msg.Header.MsgNum]; ok {
 			// Use the stored message key for decryption
 			data, err := base64.StdEncoding.DecodeString(msg.CipherText)
@@ -150,7 +150,7 @@ func (rs *RatchetState) DecryptMessage(msg Message, salt []byte, info []byte) (s
 			// Remove the used message key to prevent reuse
 			delete(msgKeyMap, msg.Header.MsgNum)
 			if len(msgKeyMap) == 0 {
-				delete(rs.skippedMsgKeyMap, peerKeyStr)
+				delete(rs.SkippedMsgKeyMap, peerKeyStr)
 			}
 
 			return string(plaintext), nil
@@ -171,10 +171,10 @@ func (rs *RatchetState) DecryptMessage(msg Message, salt []byte, info []byte) (s
 		rs.RecvMsgNum++
 
 		// Store the message key for the skipped message
-		if rs.skippedMsgKeyMap[peerKeyStr] == nil {
-			rs.skippedMsgKeyMap[peerKeyStr] = make(map[uint32][]byte)
+		if rs.SkippedMsgKeyMap[peerKeyStr] == nil {
+			rs.SkippedMsgKeyMap[peerKeyStr] = make(map[uint32][]byte)
 		}
-		rs.skippedMsgKeyMap[peerKeyStr][rs.RecvMsgNum] = msgKey
+		rs.SkippedMsgKeyMap[peerKeyStr][rs.RecvMsgNum] = msgKey
 	}
 
 	// Derive the message key for decryption
